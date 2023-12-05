@@ -19,10 +19,10 @@ for l in lines:
 # part 1
 def map_seed_to_location(s):
     for m in mappings:
-        pos = bisect_right(m, (s + 1,))
-        if pos == 0:
+        idx = bisect_right(m, (s + 1,))
+        if idx == 0:
             continue
-        src, m_len, dst = m[pos - 1]
+        src, m_len, dst = m[idx - 1]
         if s < src or s >= src + m_len:
             continue
         s = s - src + dst
@@ -33,18 +33,6 @@ print(min(map_seed_to_location(seed) for seed in seeds))
 
 
 # part 2
-class IndexedRange(Sequence):
-    def __init__(self, start, length):
-        self.start = start
-        self.length = length
-
-    def __len__(self):
-        return self.length
-
-    def __getitem__(self, idx):
-        return self.start + idx
-
-
 def map_seed_range_to_location(src_ranges):
     for m in mappings:
         dst_ranges = []
