@@ -1,6 +1,8 @@
 words = {
     w: idx + 1
-    for idx, w in enumerate(["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"])
+    for idx, w in enumerate(
+        ["one", "two", "three", "four", "five", "six", "seven", "eight", "nine"]
+    )
 }
 
 
@@ -15,8 +17,14 @@ def digit_at(s: str, pos: int, use_words: bool):
 
 
 def calibration_value(s: str, use_words: bool):
-    first = next(d for d in (digit_at(s, p, use_words) for p in range(len(s))) if d is not None)
-    last = next(d for d in (digit_at(s, p, use_words) for p in range(len(s) - 1, -1, -1)) if d is not None)
+    first = next(
+        d for d in (digit_at(s, p, use_words) for p in range(len(s))) if d is not None
+    )
+    last = next(
+        d
+        for d in (digit_at(s, p, use_words) for p in range(len(s) - 1, -1, -1))
+        if d is not None
+    )
     return first * 10 + last
 
 

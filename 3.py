@@ -1,7 +1,9 @@
 from functools import reduce
 import numpy as np
 
-lines: list[str] = list(filter(None, map(lambda x: x.strip(), open("3.txt", "r").readlines())))
+lines: list[str] = list(
+    filter(None, map(lambda x: x.strip(), open("3.txt", "r").readlines()))
+)
 
 symbols: list[tuple[int, int]] = []
 stars: list[tuple[int, int]] = []
@@ -23,8 +25,8 @@ for row, line in enumerate(lines):
                 numbers.append(num_arr)
                 num_values.append(to_val(num_arr, line))
                 num_arr = []
-            if ch != '.':
-                if ch == '*':
+            if ch != ".":
+                if ch == "*":
                     stars.append((row, col))
                 symbols.append((row, col))
     if num_arr:

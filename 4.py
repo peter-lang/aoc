@@ -1,8 +1,12 @@
-lines: list[str] = list(filter(None, map(lambda x: x.strip(), open("4.txt", "r").readlines())))
+lines: list[str] = list(
+    filter(None, map(lambda x: x.strip(), open("4.txt", "r").readlines()))
+)
 
 cards = [
     (list(map(lambda x: int(x), lhs.split())), list(map(lambda x: int(x), rhs.split())))
-    for lhs, rhs in (map(lambda x: x.strip(), l.split(":")[1].strip().split("|")) for l in lines)
+    for lhs, rhs in (
+        map(lambda x: x.strip(), l.split(":")[1].strip().split("|")) for l in lines
+    )
 ]
 
 
@@ -24,7 +28,6 @@ print(sum(score(card) for card in cards))
 
 
 # part 2
-
 def won_cards(pile: list[tuple[list[int], list[int]]]) -> int:
     copies = [0] * len(pile)
     for i in range(len(pile)):

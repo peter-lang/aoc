@@ -1,14 +1,15 @@
 from bisect import bisect_right, insort_right
 from itertools import islice
-from typing import Sequence
 
-lines: list[str] = list(filter(None, map(lambda x: x.strip(), open("5.txt", "r").readlines())))
+lines: list[str] = list(
+    filter(None, map(lambda x: x.strip(), open("5.txt", "r").readlines()))
+)
 
 seeds = []
 mappings = []
 for l in lines:
     if l.startswith("seeds:"):
-        seeds = list(map(lambda x: int(x.strip()), l[len("seeds:"):].split()))
+        seeds = list(map(lambda x: int(x.strip()), l[len("seeds:") :].split()))
     elif l.endswith("map:"):
         mappings.append([])
     else:
