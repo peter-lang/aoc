@@ -45,7 +45,7 @@ def map_seed_range_to_location(src_ranges):
                 if idx < len(m):
                     # src_range:      |-----------|
                     # map_range: |idx-1....|   |idx......|
-                    # select   :      |========|--|
+                    # select   :      |========|..|
                     m_src_next, _, _ = m[idx]
                     range_len = min(remaining_range_len, m_src_next - range_start)
                 else:
