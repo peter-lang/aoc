@@ -46,7 +46,7 @@ class IndexedRange(Sequence):
 
 
 def map_seed_range_to_location(src_ranges):
-    def find_first_mapping(_m, s, max_len):
+    def find_first_mapped_range(_m, s, max_len):
         p = bisect_right(_m, (s + 1,))
         # find last index which would have the same mapping
         p_len = bisect_right(IndexedRange(s, max_len), p, key=lambda x: bisect_right(_m, (x + 1,)))
@@ -54,24 +54,35 @@ def map_seed_range_to_location(src_ranges):
 
     for m in mappings:
         dst_ranges = []
-        for start, length in src_ranges:
-            while length > 0:
-                pos, pos_len = find_first_mapping(m, start, length)
-                if pos == 0:
-                    dst_ranges.append((start, pos_len))
+        for range_start, remaining_range_len in src_ranges:
+            while remaining_range_len > 0:
+                # cut src_ranges by map_ranges starts:
+                # src_ranges: |-----|  |----------|   |---|
+                # map_ranges:     |-------|     |---|
+                # cut ranges: |---|-|  |--------|-|   |---|
+                # select first, along with the last mapped_range, that starts at the same point or before
+                idx, range_len = find_first_mapped_range(m, range_start, remaining_range_len)
+                if idx == 0:
+                    # src_range is before all existing mapping
+                    dst_ranges.append((range_start, range_len))
                 else:
-                    # src <= start
-                    src, m_len, dst = m[pos - 1]
-                    if start >= src + m_len:
-                        dst_ranges.append((start, pos_len))
+                    m_src, m_len, m_dst = m[idx - 1]
+                    if range_start >= m_src + m_len:
+                        # src_range:         |---|
+                        # map_range: |----|
+                        dst_ranges.append((range_start, range_len))
                     else:
-                        mapped_len = min(src - start + m_len, pos_len)
-                        unmapped_len = pos_len - mapped_len
-                        dst_ranges.append((start - src + dst, mapped_len))
+                        # src_range: |-----.....|
+                        # map_range: |-----|
+                        mapped_len = min(m_src - range_start + m_len, range_len)
+                        unmapped_len = range_len - mapped_len
+                        dst_ranges.append((range_start - m_src + m_dst, mapped_len))
                         if unmapped_len:
-                            dst_ranges.append((start + mapped_len, unmapped_len))
-                start += pos_len
-                length -= pos_len
+                            # src_range: |.....-----|
+                            # map_range: |-----|
+                            dst_ranges.append((range_start + mapped_len, unmapped_len))
+                range_start += range_len
+                remaining_range_len -= range_len
         src_ranges = dst_ranges
     return src_ranges
 
