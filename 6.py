@@ -9,11 +9,17 @@ num_lines = list(
 )
 
 
-def hold_time_dur(min_time, dist):
-    discriminant = math.sqrt(min_time**2 - 4 * dist)
-    min_hold_time = math.floor((min_time - discriminant) * 0.5) + 1
-    max_hold_time = math.ceil((min_time + discriminant) * 0.5) - 1
-    return max_hold_time - min_hold_time + 1
+def hold_time_dur(t_best, dist):
+    # x := pressing time, x > 0
+    # t_best > t_total = x + dist / x
+    # 0 > x**2 - t_best * x + dist
+    discriminant = math.sqrt(t_best ** 2 - 4 * dist)
+    # x_min smallest int: x_min > (t_best - discriminant) / 2
+    x_min = math.floor((t_best - discriminant) * 0.5) + 1
+    # x_max biggest int : x_max < (t_best + discriminant) / 2
+    x_max = math.ceil((t_best + discriminant) * 0.5) - 1
+    interval_length = x_max - x_min + 1
+    return interval_length
 
 
 # part 1
