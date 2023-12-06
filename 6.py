@@ -3,7 +3,7 @@ from functools import reduce
 
 num_lines = list(
     map(
-        lambda x: x[len("Distance:") :].strip(),
+        lambda x: x.split(":")[1].strip(),
         filter(None, map(lambda x: x.strip(), open("6.txt", "r").readlines())),
     )
 )
