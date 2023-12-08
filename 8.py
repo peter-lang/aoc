@@ -51,12 +51,12 @@ sources = [idx for idx, name in enumerate(idx2node) if name.endswith('A')]
 destinations = set([idx for idx, name in enumerate(idx2node) if name.endswith('Z')])
 moduli = []
 for src in sources:
-    path_len, dst1 = path_length_to(src, INSTRUCTIONS, destinations)
+    offset_len, dst1 = path_length_to(src, INSTRUCTIONS, destinations)
     cycle_len, dst2 = path_length_to(dst1, INSTRUCTIONS, destinations)
     # first we need to check what are our cycles
-    # fortunately, every starting point cycles around distinct end points and path length == cycle length
+    # fortunately, every starting point cycles around distinct end points and len(offset) == len(cycle)
     assert dst1 == dst2
-    assert path_len == cycle_len
-    moduli.append(path_len)
+    assert offset_len == cycle_len
+    moduli.append(offset_len)
 
 print(reduce(lambda a, b: a*b//gcd(a, b), moduli, 1))
