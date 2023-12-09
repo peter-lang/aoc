@@ -13,7 +13,7 @@ def hold_time_dur(t_best, dist):
     # x := pressing time, x > 0
     # t_best > t_total = x + dist / x
     # 0 > x**2 - t_best * x + dist
-    discriminant = math.sqrt(t_best ** 2 - 4 * dist)
+    discriminant = math.sqrt(t_best**2 - 4 * dist)
     # x_min smallest int: x_min > (t_best - discriminant) / 2
     x_min = math.floor((t_best - discriminant) * 0.5) + 1
     # x_max biggest int : x_max < (t_best + discriminant) / 2

@@ -24,7 +24,7 @@ def hand_type(counts):
 
 
 # part 1
-value_to_card_1 = list(map(lambda x: str(x), range(2, 10))) + ['T', 'J', 'Q', 'K', 'A']
+value_to_card_1 = list(map(lambda x: str(x), range(2, 10))) + ["T", "J", "Q", "K", "A"]
 card_to_value_1 = {c: v for v, c in enumerate(value_to_card_1)}
 
 
@@ -36,15 +36,15 @@ def parse_hand_1(hand):
 
 
 hands_1 = list(
-    (parse_hand_1(hand), int(bid))
-    for hand, bid in
-    map(lambda x: x.split(), lines)
+    (parse_hand_1(hand), int(bid)) for hand, bid in map(lambda x: x.split(), lines)
 )
 
-print(sum((r+1)*bid for r, (hand, bid) in enumerate(sorted(hands_1))))
+print(sum((r + 1) * bid for r, (hand, bid) in enumerate(sorted(hands_1))))
 
 # part 2
-value_to_card_2 = ['J'] + list(map(lambda x: str(x), range(2, 10))) + ['T', 'Q', 'K', 'A']
+value_to_card_2 = (
+    ["J"] + list(map(lambda x: str(x), range(2, 10))) + ["T", "Q", "K", "A"]
+)
 card_to_value_2 = {c: v for v, c in enumerate(value_to_card_2)}
 
 
@@ -61,9 +61,7 @@ def parse_hand_2(hand):
 
 
 hands_2 = list(
-    (parse_hand_2(hand), int(bid))
-    for hand, bid in
-    map(lambda x: x.split(), lines)
+    (parse_hand_2(hand), int(bid)) for hand, bid in map(lambda x: x.split(), lines)
 )
 
-print(sum((r+1)*bid for r, (hand, bid) in enumerate(sorted(hands_2))))
+print(sum((r + 1) * bid for r, (hand, bid) in enumerate(sorted(hands_2))))
