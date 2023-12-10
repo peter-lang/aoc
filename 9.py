@@ -39,9 +39,11 @@ def polynomial_formula(seq):
     result = coefficient[0] * binomial_polynom
 
     for deg in range(1, len(coefficient)):
-        binomial_polynom = (np.roll(binomial_polynom, -1) - (deg-1)*binomial_polynom)/deg
+        binomial_polynom = np.roll(binomial_polynom, -1) - (deg - 1) * binomial_polynom
+        binomial_polynom = binomial_polynom / deg
         result += coefficient[deg] * binomial_polynom
     return result
+
 
 # poly = polynomial_formula(np.array([1, 2, 4, 8, 16]))
 # print(np.polyval(poly, 5), np.polyval(poly, 6))  # 31, 57, ...
