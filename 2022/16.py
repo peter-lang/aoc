@@ -1,7 +1,7 @@
-import pulp as pl
-import numpy as np
+import math
 import re
-import sys
+from functools import cache
+
 
 lines = list(filter(None, map(lambda x: x.strip(), open("16.txt", "r").readlines())))
 
@@ -18,118 +18,61 @@ name2idx = {name: idx for idx, (name, _, _) in enumerate(nodes)}
 
 
 def floyd_warshall():
-    adjacency = np.full((len(nodes), len(nodes)), sys.maxsize // 2, dtype=int)
+    adjacency = [[math.inf] * len(nodes) for _ in range(len(nodes))]
     for idx in range(len(nodes)):
-        adjacency[idx, idx] = 0
+        adjacency[idx][idx] = 0
         for n_idx in map(lambda x: name2idx[x], nodes[idx][2]):
-            adjacency[idx, n_idx] = 1
-
+            adjacency[idx][n_idx] = 1
     for k in range(len(nodes)):
         for i in range(len(nodes)):
             for j in range(len(nodes)):
-                updated_dist = adjacency[i, k] + adjacency[k, j]
-                if adjacency[i, j] > updated_dist:
-                    adjacency[i, j] = updated_dist
+                adjacency[i][j] = min(
+                    adjacency[i][j], adjacency[i][k] + adjacency[k][j]
+                )
 
     return adjacency
 
 
 DISTANCES = floyd_warshall()
-assert nodes[name2idx["AA"]][1] == 0
+assert name2idx["AA"] == 0
+assert nodes[0][1] == 0, "AA required to have no valve"
 FLOW_RATES = [flow for _, flow, _ in nodes if flow > 0]
-poi = [name2idx["AA"]] + [idx for idx, (name, flow, _) in enumerate(nodes) if flow > 0]
-DISTANCES = DISTANCES[poi, :][:, poi]
+assert all(
+    v < math.inf for r in DISTANCES for v in r
+), "Graph if expected to be fully connected"
+POI = tuple(idx for idx, (name, flow, _) in enumerate(nodes) if flow > 0)
 
 
-def part_1(distances, flow_rates, max_t):
-    model = pl.LpProblem(sense=pl.LpMaximize)
+@cache
+def longest_path(open_set, last, time) -> int:
+    total = 0
+    for p in open_set:
+        t = time - DISTANCES[last][p] - 1
+        if t > 0:
+            contribution = t * nodes[p][1]
+            total = max(total, contribution + longest_path(open_set - {p}, p, t))
+    return total
 
-    valves = [[] for _ in flow_rates]
-    for idx, valve in enumerate(valves):
-        init_dist = distances[0, idx + 1]
-        for t in range(max_t):
-            v = pl.LpVariable(f"v-{idx}-{t}", lowBound=0, upBound=1, cat=pl.LpInteger)
-            valve.append(v)
-            if t < init_dist:
-                v.setInitialValue(0)
-                v.fixValue()
 
-    # a valve can be opened once
-    for idx in range(len(flow_rates)):
-        model += pl.lpSum(valves[idx][t] for t in range(max_t)) <= 1
+# part 1
+print(longest_path(frozenset(POI), 0, 30))
 
-    # if v1 opened at t1, v2 opened at t2, abs(t1 - t2) > dist
-    for v1 in range(len(flow_rates)):
-        for v2 in range(v1):
-            dist = distances[v1 + 1, v2 + 1]
-            for t1 in range(max_t - dist):
-                model += (
-                    pl.lpSum(
-                        valves[v1][t1 + dt] + valves[v2][t1 + dt]
-                        for dt in range(dist + 1)
-                    )
-                    <= 1
-                )
 
-    model += pl.lpSum(
-        valves[idx][t] * flow * (max_t - t - 1)
-        for idx, flow in enumerate(flow_rates)
-        for t in range(max_t)
+def split_powerset(s):
+    x = len(s)
+    total = (1 << x) - 1
+    for i in range(1 << (x - 1)):
+        complement = total - i
+        set_a = tuple(s[j] for j in range(x) if (i & (1 << j)))
+        set_b = tuple(s[j] for j in range(x) if (complement & (1 << j)))
+        yield set_a, set_b
+
+
+#
+# part 2
+print(
+    max(
+        longest_path(frozenset(a), 0, 26) + longest_path(frozenset(b), 0, 26)
+        for a, b in split_powerset(POI)
     )
-
-    model.solve(pl.PULP_CBC_CMD(msg=0))
-    return int(model.objective.value())
-
-
-print(part_1(DISTANCES, FLOW_RATES, 30))
-
-
-def part_2(distances, flow_rates, max_t, actors):
-    model = pl.LpProblem(sense=pl.LpMaximize)
-
-    valves = [[[] for v in flow_rates] for a in range(actors)]
-    for a in range(actors):
-        for idx, valve in enumerate(valves[a]):
-            init_dist = distances[0, idx + 1]
-            for t in range(max_t):
-                v = pl.LpVariable(
-                    f"v-{a}-{idx}-{t}", lowBound=0, upBound=1, cat=pl.LpInteger
-                )
-                valve.append(v)
-                if t < init_dist:
-                    v.setInitialValue(0)
-                    v.fixValue()
-
-    # a valve can be opened once
-    for idx in range(len(flow_rates)):
-        model += (
-            pl.lpSum(valves[a][idx][t] for a in range(actors) for t in range(max_t))
-            <= 1
-        )
-
-    # if v1 opened at t1, v2 opened at t2, abs(t1 - t2) > dist
-    for a in range(actors):
-        for v1 in range(len(flow_rates)):
-            for v2 in range(v1):
-                dist = distances[v1 + 1, v2 + 1]
-                for t1 in range(max_t - dist):
-                    model += (
-                        pl.lpSum(
-                            valves[a][v1][t1 + dt] + valves[a][v2][t1 + dt]
-                            for dt in range(dist + 1)
-                        )
-                        <= 1
-                    )
-
-    model += pl.lpSum(
-        valves[a][idx][t] * flow * (max_t - t - 1)
-        for idx, flow in enumerate(flow_rates)
-        for t in range(max_t)
-        for a in range(actors)
-    )
-
-    model.solve(pl.PULP_CBC_CMD(msg=0))
-    return int(model.objective.value())
-
-
-print(part_2(DISTANCES, FLOW_RATES, 26, 2))
+)
