@@ -2,3 +2,4 @@ numpy
 scipy
 PuLP
 sympy
+HeapDict
