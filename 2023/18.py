@@ -168,18 +168,18 @@ def clip_ear(points: list[COORD], rot_sign: int) -> tuple[list[COORD], int]:
                 clip_area,
             )
         else:
-            plus_point = rect_points - quad_points
-            assert len(plus_point) == 1
-            plus_point = plus_point.pop()
+            additional_point = rect_points - quad_points
+            assert len(additional_point) == 1
+            additional_point = additional_point.pop()
             remaining_point = quad_points - rect_points
             assert len(remaining_point) == 1
             remaining_point = remaining_point.pop()
             rem_idx = q.index(remaining_point)
             assert rem_idx == 0 or rem_idx == 3
             if rem_idx == 0:
-                pts_to_add = [remaining_point, plus_point]
+                pts_to_add = [remaining_point, additional_point]
             else:
-                pts_to_add = [plus_point, remaining_point]
+                pts_to_add = [additional_point, remaining_point]
 
             clipped_points = replace_idx(
                 points, idx % len(points), (idx + 3) % len(points), pts_to_add
