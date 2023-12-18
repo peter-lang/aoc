@@ -20,6 +20,10 @@ def round(b: np.array, offset: int):
     )
     if padding != ((0, 0), (0, 0)):
         b = np.pad(b, padding)
+
+    r_max = b.shape[0]
+    c_max = b.shape[1]
+
     no_east = np.zeros_like(b)
     no_east[1:-1, 1:-1] = ~(b[:-2, 2:] | b[1:-1, 2:] | b[2:, 2:])
     no_west = np.zeros_like(b)
@@ -38,15 +42,20 @@ def round(b: np.array, offset: int):
         (no_east, (0, 1)),
     ]
 
-    move = []
+    might_move = []
     for idx in range(4):
         no_neighbour, (r_d, c_d) = move_checks[(idx + offset) % 4]
-        m = np.zeros_like(b)
-        can_move = rest & no_neighbour
-        m[
-            (1 + r_d) : (m.shape[0] - 1 + r_d), (1 + c_d) : (m.shape[1] - 1 + c_d)
-        ] = can_move[1:-1, 1:-1]
-        move.append((m, (-r_d, -c_d)))
+        move = np.zeros_like(b)
+        movable = rest & no_neighbour
+
+        # move forward
+        r_start = 1 + r_d
+        r_end = r_max - 1 + r_d
+        c_start = 1 + c_d
+        c_end = c_max - 1 + c_d
+        move[r_start:r_end, c_start:c_end] = movable[1:-1, 1:-1]
+
+        might_move.append((move, (r_d, c_d)))
         rest &= ~no_neighbour
 
     result = no_move | rest
@@ -54,20 +63,22 @@ def round(b: np.array, offset: int):
     any_move = False
 
     for idx in range(4):
-        m, (r_d, c_d) = move[idx]
+        move, (r_d, c_d) = might_move[idx]
         others = np.any(
-            [o for o_idx, (o, _) in enumerate(move) if o_idx != idx], axis=0
+            [o for o_idx, (o, _) in enumerate(might_move) if o_idx != idx], axis=0
         )
-        move_without_collision = m & ~others
-        if np.any(move_without_collision):
-            any_move = True
-        result |= move_without_collision
-        collision = m & others
-        rollback = collision[
-            (1 + r_d) : (collision.shape[0] - 1 + r_d),
-            (1 + c_d) : (collision.shape[1] - 1 + c_d),
-        ]
-        result[1:-1, 1:-1] |= rollback
+        move_no_collision = move & ~others
+        any_move |= np.any(move_no_collision)
+        result |= move_no_collision
+
+        collision = move & others
+
+        # move backward
+        r_start = 1 - r_d
+        r_end = r_max - 1 - r_d
+        c_start = 1 - c_d
+        c_end = c_max - 1 - c_d
+        result[1:-1, 1:-1] |= collision[r_start:r_end, c_start:c_end]
 
     return result, any_move
 
@@ -79,7 +90,6 @@ for i in range(10):
 edges = np.where(b)
 min_rect = (edges[0].max() - edges[0].min() + 1) * (edges[1].max() - edges[1].min() + 1)
 print(min_rect - np.sum(BOARD))
-
 
 # part 2
 i = 0
