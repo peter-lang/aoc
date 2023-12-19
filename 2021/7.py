@@ -20,5 +20,6 @@ def cost(med):
 # Function: SUM abs(a - i)**2_ / 2 (2_ means falling power of 2)
 # Discrete derivative: SUM abs(a - i)**2_ / 2 = -SUM (a - i) for i<a + SUM (i-a) for i>=a = SUM (i-a)
 # Maximum, where discrete derivative is 0 => i = sum(a) / len(a)
+# Note: this is an approximation, as chain-rule does not work seamlessly, but the error is negligible
 squared_median = sum(numbers) / len(numbers)
 print(min(cost(math.ceil(squared_median)), cost(math.floor(squared_median))))
