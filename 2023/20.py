@@ -156,4 +156,4 @@ assert all(
     for hi in high_at_press
 )
 mods = [hi[0] for hi in high_at_press]
-print(reduce(lambda x, y: x * y // math.gcd(x, y), mods))
+print(reduce(lambda x, y: x * y // math.gcd(x, y), mods, 1))
