@@ -2,7 +2,6 @@ from collections import deque
 from functools import partial, reduce
 import math
 
-
 ADR = int | None
 STATE = list[bool] | bool | None
 
@@ -72,8 +71,8 @@ for module_idx, ((module_type, name), connections) in enumerate(lines):
             conj2srcs[c].append(module_idx)
 
 assert len(rx_req) <= 1
+# rx parent emits low, when all rx grandparents emits high
 rx_req = [] if len(rx_req) == 0 else conj2srcs[rx_req[0]]
-
 
 for (module_type, name), connections in lines:
     resolved_connections = list(name2idx.get(c, None) for c in connections)
