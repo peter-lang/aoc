@@ -195,18 +195,31 @@ struct mx2 {
     }
 
     mx2 repeat(size_t x, size_t y) {
+        assert(x > 0 && y > 0);
         mx2 result({shape.x*x, shape.y*y});
         size_t src_x_offset = y*shape.y;
         size_t rep_x_offset = shape.x*src_x_offset;
-        for (size_t rep_x = 0; rep_x < x; rep_x++) {
-            for (size_t src_x = 0; src_x < shape.x; src_x++) {
-                for (size_t rep_y = 0; rep_y < y; rep_y++) {
-                    std::copy(
-                        data.begin()+src_x*shape.y,
-                        data.begin()+(src_x+1)*shape.y,
-                        result.data.begin()+rep_x*rep_x_offset + src_x*src_x_offset + rep_y*shape.y
-                    );
+        if (y > 1) {
+            auto dst = result.data.begin();
+            for (size_t rep_x = 0; rep_x < x; rep_x++) {
+                for (size_t src_x = 0; src_x < shape.x; src_x++) {
+                    for (size_t rep_y = 0; rep_y < y; rep_y++) {
+                        dst = std::copy(
+                            data.begin()+src_x*shape.y,
+                            data.begin()+(src_x+1)*shape.y,
+                            dst
+                        );
+                    }
                 }
+            }
+        } else {
+            auto dst = result.data.begin();
+            for (size_t rep_x = 0; rep_x < x; rep_x++) {
+                dst = std::copy(
+                    data.begin(),
+                    data.end(),
+                    dst
+                );
             }
         }
         return result;
