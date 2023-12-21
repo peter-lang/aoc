@@ -4,135 +4,65 @@
 #include <vector>
 #include <queue>
 
+#include "../lib/vec.hpp"
+
 using namespace std;
 
-typedef vector<uint8_t> ROW;
-typedef vector<vector<uint8_t>> MX;
+typedef uint8_t MX_T;
+typedef mx2<MX_T> MX;
 
-template <class T>
-struct vec2 {
-    T x, y;
-
-    vec2() :x(0), y(0) {}
-    vec2(T x, T y) : x(x), y(y) {}
-    vec2(const vec2& v) : x(v.x), y(v.y) {}
-    
-    vec2& operator=(const vec2& v) {
-        x = v.x;
-        y = v.y;
-        return *this;
-    }
-    
-    vec2 operator+(const vec2& v) const {
-        return vec2(x + v.x, y + v.y);
-    }
-
-    vec2 operator-(const vec2& v) const {
-        return vec2(x - v.x, y - v.y);
-    }
-    
-    vec2& operator+=(const vec2& v) {
-        x += v.x;
-        y += v.y;
-        return *this;
-    }
-
-    vec2& operator-=(const vec2& v) {
-        x -= v.x;
-        y -= v.y;
-        return *this;
-    }
-    
-    vec2 operator+(T s) const {
-        return vec2(x + s, y + s);
-    }
-
-    vec2 operator-(T s) const {
-        return vec2(x - s, y - s);
-    }
-
-    vec2 operator*(T s) const {
-        return vec2(x * s, y * s);
-    }
-
-    vec2 operator/(T s) const {
-        return vec2(x / s, y / s);
-    }
-    
-    
-    vec2& operator+=(T s) {
-        x += s;
-        y += s;
-        return *this;
-    }
-
-    vec2& operator-=(T s) {
-        x -= s;
-        y -= s;
-        return *this;
-    }
-
-    vec2& operator*=(T s) {
-        x *= s;
-        y *= s;
-        return *this;
-    }
-
-    vec2& operator/=(T s) {
-        x /= s;
-        y /= s;
-        return *this;
-    }
-
-};
-
-typedef vec2<int> vec2i;
-
-MX read_input(string filename) {
-    ifstream file(filename);
+MX read_input(istream& stream) {
     string str;
-    MX result;
-    while (getline(file, str)) {
-        ROW r;
+
+    vector<vector<MX_T>> result;
+    while (getline(stream, str)) {
+        vector<MX_T> row;
         for(char& c : str) {
-            r.push_back(c - '0');
+            row.push_back(c - '0');
         }
-        result.push_back(r);
+        result.push_back(row);
     }
-    return result;
+    return mx2(result);
+}
+
+MX read_input(int argc, char **argv) {
+    if (argc > 1) {
+        auto stream = fstream(argv[1]);
+        return read_input(stream);
+    } else {
+        return read_input(cin);
+    }
 }
 
 int iterate(MX& mx) {
     queue<vec2i> q;
     int flashes = 0;
-    for (int r = 0; r < mx.size(); r++) {
-        for (int c = 0; c < mx[r].size(); c++) {
-            mx[r][c]++;
-            if (mx[r][c] == 10) {
-                mx[r][c] = 0;
-                q.push({r, c});
+    for (int x = 0; x < mx.shape.x; x++) {
+        for (int y = 0; y < mx.shape.y; y++) {
+            mx.at(x, y)++;
+            if (mx.at(x, y) == 10) {
+                mx.at(x, y) = 0;
+                q.push({x, y});
             }
         }
     }
-    vec2i neighbours[] = {
+    static const vec2i neighbours[] = {
         {-1, -1}, {-1, 0}, {-1, 1},
         {0, -1}, {0, 1},
         {1, -1}, {1, 0}, {1, 1}
     };
-    size_t max_x = mx.size();
-    size_t max_y = mx[0].size();
     while (!q.empty()) {
         auto co = q.front();
         flashes++;
         for (auto&& nr : neighbours) {
             auto n = co + nr;
-            if (n.x < 0 || n.x >= max_x || n.y < 0 || n.y >= max_y)
+            if (n.x < 0 || n.x >= mx.shape.x || n.y < 0 || n.y >= mx.shape.y)
                 continue;
-            if (mx[n.x][n.y] == 0)
+            if (mx.at(n) == 0)
                 continue;
-            mx[n.x][n.y]++;
-            if (mx[n.x][n.y] == 10) {
-                mx[n.x][n.y] = 0;
+            mx.at(n)++;
+            if (mx.at(n) == 10) {
+                mx.at(n) = 0;
                 q.push(n);
             }
         }
@@ -141,30 +71,33 @@ int iterate(MX& mx) {
     return flashes;
 }
 
-
-ostream& operator<<(ostream& stream, const MX& mx) {
-    for (auto&& r : mx) {
-        for (auto&& v : r) {
-            stream << int(v);
+template <class T>
+std::ostream& operator<<(std::ostream& stream, const mx2<T>& mx) {
+    for (size_t x = 0; x < mx.shape.x; x++) {
+        for (size_t y = 0; y < mx.shape.y; y++) {
+            stream << int(mx.at(x, y));
         }
-        stream << endl;
+        stream << std::endl;
     }
     return stream;
 }
 
+int main(int argc, char **argv) {
+    auto stream = fstream("11.txt");
+    auto mx = read_input(stream);
+    // auto mx = read_input(argc, argv);
 
-int main() {
-    auto mx_1 = read_input("11.txt");
-    auto mx_2 = read_input("11.txt");
-    int mx_size = mx_1.size() * mx_1[0].size();
+    auto mx2 = mx;
+    int mx_size = mx.size();
     auto start = chrono::steady_clock::now();
+
 
     int total = 0;
     for (int i = 0; i < 100; i++) {
-        total += iterate(mx_1);
+        total += iterate(mx);
     }
     int idx = 1;
-    while (iterate(mx_2) != mx_size) {
+    while (iterate(mx2) != mx_size) {
         idx++;
     }
 
