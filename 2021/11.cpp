@@ -37,12 +37,13 @@ MX read_input(int argc, char **argv) {
 int iterate(MX& mx) {
     queue<vec2i> q;
     int flashes = 0;
-    for (int x = 0; x < mx.shape.x; x++) {
-        for (int y = 0; y < mx.shape.y; y++) {
-            mx.at(x, y)++;
-            if (mx.at(x, y) == 10) {
-                mx.at(x, y) = 0;
-                q.push({x, y});
+    for (size_t x = 0; x < mx.shape.x; x++) {
+        for (size_t y = 0; y < mx.shape.y; y++) {
+            vec2size n = {x, y};
+            mx[n]++;
+            if (mx[n] == 10) {
+                mx[n] = 0;
+                q.push(n);
             }
         }
     }
@@ -55,14 +56,15 @@ int iterate(MX& mx) {
         auto co = q.front();
         flashes++;
         for (auto&& nr : neighbours) {
-            auto n = co + nr;
-            if (n.x < 0 || n.x >= mx.shape.x || n.y < 0 || n.y >= mx.shape.y)
+            vec2i ch = co + nr;
+            if (ch.x < 0 || ch.x >= mx.shape.x || ch.y < 0 || ch.y >= mx.shape.y)
                 continue;
-            if (mx.at(n) == 0)
+            vec2size n = ch;
+            if (mx[n] == 0)
                 continue;
-            mx.at(n)++;
-            if (mx.at(n) == 10) {
-                mx.at(n) = 0;
+            mx[n]++;
+            if (mx[n] == 10) {
+                mx[n] = 0;
                 q.push(n);
             }
         }

@@ -109,11 +109,11 @@ struct mx2slice {
         return orig.at(offset.x + x, offset.y + y);
     }
 
-    const T& at(vec2size coord) const {
+    const T& operator[](const vec2size& coord) const {
         return at(coord.x, coord.y);
     }
 
-    T& at(vec2size coord) {
+    T& operator[](const vec2size& coord) {
         return at(coord.x, coord.y);
     }
 
@@ -186,11 +186,11 @@ struct mx2 {
         return data[x*shape.y + y];
     }
 
-    const T& at(const vec2size& coord) const {
+    const T& operator[](const vec2size& coord) const {
         return at(coord.x, coord.y);
     }
 
-    T& at(const vec2size& coord) {
+    T& operator[](const vec2size& coord) {
         return at(coord.x, coord.y);
     }
 
