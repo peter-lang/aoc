@@ -14,7 +14,7 @@ struct heapdict {
   std::map<K, ITEM> _map;
   std::vector<ITEM> _heap;
 
-  void _heapify(size_t pos) {
+  void _heap_item_descend(size_t pos) {
     while (true) {
       size_t smallest = pos;
       size_t left = 2*pos+1;
@@ -34,18 +34,35 @@ struct heapdict {
     }
   }
 
+  void _heap_item_ascend(size_t pos) {
+    while (pos > 0 && std::get<1>(*_heap[pos]) < std::get<1>(*_heap[(pos-1)/2])) {
+      swap(pos, (pos-1)/2);
+      pos = (pos-1)/2;
+    }
+  }
+
   void swap(size_t a, size_t b) {
     std::swap(std::get<2>(*_heap[a]), std::get<2>(*_heap[b]));
     std::swap(_heap[a], _heap[b]);
   }
 
+  std::tuple<K, V> pop_last() {
+      const ITEM& item = _heap.back();
+      _map.erase(std::get<0>(*item));
+      auto result = make_tuple(std::get<0>(*item), std::get<1>(*item));
+      _heap.pop_back();
+      return result;
+  }
+
   std::tuple<K, V> pop_item(size_t pos = 0) {
+    if (pos == _heap.size() - 1) {
+      return pop_last();
+    }
+    // swap with last item to safely remove it
     swap(pos, _heap.size()-1);
-    const ITEM& item = _heap.back();
-    _map.erase(std::get<0>(*item));
-    auto result = make_tuple(std::get<0>(*item), std::get<1>(*item));
-    _heap.pop_back();
-    _heapify(pos);
+    auto result = pop_last();
+    // descend the last item to its real position
+    _heap_item_descend(pos);
     return result;
   }
 
@@ -62,24 +79,20 @@ struct heapdict {
         return;
       } else if (value > found_item_value) {
         found_item_value = value;
-        _heapify(std::get<2>(*found_item));
+        // item get bigger, we can try to descend it
+        _heap_item_descend(std::get<2>(*found_item));
       } else {
         found_item_value = value;
-        size_t pos = std::get<2>(*found_item);
-        while (pos > 0 && std::get<1>(*_heap[pos]) < std::get<1>(*_heap[(pos-1)/2])) {
-          swap(pos, (pos-1)/2);
-          pos = (pos-1)/2;
-        }
+        // item get smaller, we can try to ascend it
+        _heap_item_ascend(std::get<2>(*found_item));
       }
     } else {
+      // add as last and ascend it
       size_t pos = _heap.size();
       auto item = std::make_shared<ITEM_VAL>(std::make_tuple(key, value, pos));
       _heap.push_back(item);
       _map.insert(std::pair<K, ITEM>(key, item));
-      while (pos > 0 && std::get<1>(*_heap[pos]) < std::get<1>(*_heap[(pos-1)/2])) {
-        swap(pos, (pos-1)/2);
-        pos = (pos-1)/2;
-      }
+      _heap_item_ascend(pos);
     }
   }
 };
