@@ -6,7 +6,7 @@
 template <class K, class V>
 struct heapdict {
 
-  typedef std::tuple<K, V, size_t> ITEM_VAL;
+  typedef std::tuple<K, V, size_t> ITEM;
 
   std::map<K, ITEM> _map;
   std::vector<std::reference_wrapper<ITEM>> _heap;
