@@ -101,10 +101,10 @@ def longest_path_ip(graph: dict[NODE, list[tuple[NODE, int]]]) -> int:
     node_order = dict()
     for node in graph:
         node_deg_out[node] = pl.LpVariable(
-            f"in({node[0]},{node[1]})", lowBound=0, upBound=1, cat=pl.LpInteger
+            f"out({node[0]},{node[1]})", lowBound=0, upBound=1, cat=pl.LpInteger
         )
         node_deg_in[node] = pl.LpVariable(
-            f"out({node[0]},{node[1]})", lowBound=0, upBound=1, cat=pl.LpInteger
+            f"in({node[0]},{node[1]})", lowBound=0, upBound=1, cat=pl.LpInteger
         )
         node_order[node] = pl.LpVariable(
             f"order({node[0]},{node[1]})",
@@ -152,8 +152,8 @@ def longest_path_ip(graph: dict[NODE, list[tuple[NODE, int]]]) -> int:
             # if there is no edge, the last part makes sure this is always true, independent of order
             order_end = node_order[end]
             order_start = node_order[start]
-            model += order_end <= order_start + 1 - len(graph) * (edge_var - 1)
-            model += order_end >= order_start + 1 + len(graph) * (edge_var - 1)
+            model += order_end <= order_start + 1 + len(graph) * (1 - edge_var)
+            model += order_end >= order_start + 1 - len(graph) * (1 - edge_var)
 
     # inner nodes must have the same in/out degree
     for node in graph:
