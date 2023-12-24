@@ -33,7 +33,7 @@ for y_v in range(-max_y_v - 1, max_y_v + 1):
     for t in range(y_t_offset + y_t_min, y_t_offset + y_t_max + 1):
         assert y_min <= sum((y_v - i) for i in range(t)) <= y_max
         x_v = 0
-        # TODO: there is probably a better formula for f=this
+        # TODO: there is probably a better formula for this
         while sum(x_v - i for i in range(min(t, x_v))) < x_min:
             x_v += 1
         while sum(x_v - i for i in range(min(t, x_v))) <= x_max:
