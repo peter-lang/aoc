@@ -1,6 +1,5 @@
 import numpy as np
 from collections import deque
-import math
 
 EDGE_LIST = {
     a: b.split(" ")
