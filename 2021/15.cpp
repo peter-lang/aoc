@@ -77,6 +77,8 @@ int main(int argc, char **argv) {
     auto mx = read_input(stream);
 //    auto mx = read_input(argc, argv);
 
+    auto start = chrono::steady_clock::now();
+
     auto mx_extended = mx.repeat(5, 5);
     for (size_t x = 0; x < 5; x++)
         for (size_t y = 0; y < 5; y++)
@@ -85,8 +87,14 @@ int main(int argc, char **argv) {
     mx_extended %= 9;
     mx_extended += 1;
 
-    cout << a_star(mx) << endl;
-    cout << a_star(mx_extended) << endl;
+    auto p1 = a_star(mx);
+    auto p2 = a_star(mx_extended);
+
+    auto end = chrono::steady_clock::now();
+    cout << "part 1: " << p1 << endl;
+    cout << "part 2: " << p2 << endl;
+
+    cout << "Runtime: " << chrono::duration_cast<chrono::microseconds>(end-start).count() << " us" << endl;
 
     return 0;
 }
