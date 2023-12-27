@@ -55,8 +55,6 @@ def all_2d_collisions(trajectories):
             coll = collision_2d(a[0], a[1], b[0], b[1], axis=(1, 2))
             if coll is not None:
                 collisions.append((coll, b))
-        if len(collisions) >= 2:
-            pass
 
 
 # part 1

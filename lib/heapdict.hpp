@@ -1,6 +1,7 @@
 #include <map>
 #include <vector>
 #include <tuple>
+#include <utility>
 #include <functional>
 #include <memory>
 
@@ -46,15 +47,15 @@ struct heapdict {
     std::swap(_heap[a], _heap[b]);
   }
 
-  std::tuple<K, V> pop_last() {
+  std::pair<K, V> pop_last() {
       const ITEM& item = _heap.back();
       _map.erase(std::get<0>(*item));
-      auto result = make_tuple(std::get<0>(*item), std::get<1>(*item));
+      auto result = std::make_pair(std::get<0>(*item), std::get<1>(*item));
       _heap.pop_back();
       return result;
   }
 
-  std::tuple<K, V> pop_item(size_t pos = 0) {
+  std::pair<K, V> pop_item(size_t pos = 0) {
     if (pos == _heap.size() - 1) {
       return pop_last();
     }

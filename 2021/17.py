@@ -27,8 +27,6 @@ for y_v in range(-max_y_v - 1, max_y_v + 1):
     y_offset = (y_start + 1) * y_start
     y_t_min = math.ceil(0.5 * (math.sqrt(1 + 4 * (2 * (-y_max) + y_offset)) - 1))
     y_t_max = math.floor(0.5 * (math.sqrt(1 + 4 * (2 * (-y_min) + y_offset)) - 1))
-    if y_v == 7:
-        pass
 
     for t in range(y_t_offset + y_t_min, y_t_offset + y_t_max + 1):
         assert y_min <= sum((y_v - i) for i in range(t)) <= y_max

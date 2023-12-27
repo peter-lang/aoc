@@ -59,6 +59,8 @@ struct vec2 {
 
     vec2 operator/(T s) const { return vec2(x / s, y / s); }
 
+    vec2 operator%(T s) const { return vec2(x % s, y % s); }
+
     vec2& operator+=(T s) {
         x += s;
         y += s;
@@ -82,6 +84,16 @@ struct vec2 {
         y /= s;
         return *this;
     }
+
+    vec2& operator%=(T s) {
+        x %= s;
+        y %= s;
+        return *this;
+    }
+
+    vec2 abs() { return vec2(std::abs(x), std::abs(y)); }
+
+    T sum() { return x + y; }
 
     template <class U>
     operator vec2<U>() const {
@@ -142,6 +154,13 @@ struct mx2slice {
         for (size_t x = 0; x < shape.x; x++)
             for (size_t y = 0; y < shape.y; y++)
                 at(x, y) /= s;
+        return *this;
+    }
+
+    mx2slice& operator%=(T s) {
+        for (size_t x = 0; x < shape.x; x++)
+            for (size_t y = 0; y < shape.y; y++)
+                at(x, y) %= s;
         return *this;
     }
 };
@@ -279,6 +298,12 @@ struct mx2 {
         return result;
     }
 
+    mx2 operator%(T s) const {
+        mx2 result = *this;
+        result %= s;
+        return result;
+    }
+
     mx2& operator+=(T s) {
         for (size_t i = 0; i < data.size(); i++) data[i] += s;
         return *this;
@@ -296,6 +321,11 @@ struct mx2 {
 
     mx2& operator/=(T s) {
         for (size_t i = 0; i < data.size(); i++) data[i] /= s;
+        return *this;
+    }
+
+    mx2& operator%=(T s) {
+        for (size_t i = 0; i < data.size(); i++) data[i] %= s;
         return *this;
     }
 
