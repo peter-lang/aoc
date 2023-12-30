@@ -2,6 +2,9 @@ NUMS = [0, 3, 1, 6, 7, 5]
 
 
 def spoken_number(nums, idx):
+    if idx - 1 < len(nums):
+        return nums[idx - 1]
+
     # we don't need the last value, as it would be read as first prev value during for-loop
     mem = {v: idx for idx, v in enumerate(nums[:-1])}
 
