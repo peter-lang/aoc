@@ -53,6 +53,8 @@ def update_times(state, n):
     return state
 
 
+# part 1
 print(update_times(np.expand_dims(BOARD_2D, axis=0), 6).sum())
 
+# part 2
 print(update_times(np.expand_dims(BOARD_2D, axis=(0, 1)), 6).sum())
