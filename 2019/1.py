@@ -1,6 +1,5 @@
-numbers = list(
-    map(int, filter(None, map(lambda x: x.strip(), open("1.txt", "r").readlines())))
-)
+lines = filter(None, map(lambda x: x.strip(), open("1.txt", "r").readlines()))
+numbers = list(map(int, lines))
 
 # part 1
 print(sum(n // 3 - 2 for n in numbers))
