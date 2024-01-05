@@ -15,17 +15,14 @@ def thrust(sequence):
 def thrust_feedback(sequence):
     res = 0
     res_e = 0
-    states = [(s, intcode.Computer(code).reset()) for s in sequence]
+    comps = [intcode.Computer(code).reset([s]) for s in sequence]
     idx = 0
     while True:
-        amp_init, amp_comp = states[idx % len(states)]
-        if idx < len(states):
-            res = amp_comp.run_to_output(amp_init, res)
-        else:
-            res = amp_comp.run_to_output(res)
+        amp_comp = comps[idx % len(comps)]
+        res = amp_comp.run_to_output(res)
         if res is None:
             return res_e
-        if idx % len(states) == len(states) - 1:
+        if idx % len(comps) == len(comps) - 1:
             res_e = res
         idx += 1
 

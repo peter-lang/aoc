@@ -1,12 +1,17 @@
+from collections import deque
+
+
 class Computer:
     def __init__(self, code):
         self.code = code
         self.memory = None
+        self.inputs = None
         self.ip = None
         self.rel_base = None
 
-    def reset(self):
+    def reset(self, inputs=None):
         self.memory = list(self.code)
+        self.inputs = deque([] if inputs is None else inputs)
         self.ip = 0
         self.rel_base = 0
         return self
@@ -39,8 +44,9 @@ class Computer:
             return self.memory[adr]
         return 0
 
-    def run_to_output(self, *args, inputs=None) -> int | None:
-        inputs = iter(args) if inputs is None else inputs
+    def run_to_output(self, *args) -> int | None:
+        if args:
+            self.inputs.extend(args)
         while True:
             op_code = self.memory[self.ip] % 100
             if op_code == 1:
@@ -50,7 +56,7 @@ class Computer:
                 self.write(self.p_adr(3), self.p_val(1) * self.p_val(2))
                 self.ip += 4
             elif op_code == 3:
-                self.write(self.p_adr(1), next(inputs))
+                self.write(self.p_adr(1), self.inputs.popleft())
                 self.ip += 2
             elif op_code == 4:
                 out = self.p_val(1)
@@ -78,9 +84,20 @@ class Computer:
             else:
                 return None
 
-    def run_to_completion(self, *args, inputs=None) -> list[int]:
-        inputs = iter(args) if inputs is None else inputs
+    def run_to_outputs(self, count, *args) -> list[int]:
+        if args:
+            self.inputs.extend(args)
         outputs = []
-        while (out := self.run_to_output(inputs=inputs)) is not None:
+        while (out := self.run_to_output()) is not None:
+            outputs.append(out)
+            if len(outputs) == count:
+                return outputs
+        return None
+
+    def run_to_completion(self, *args) -> list[int]:
+        if args:
+            self.inputs.extend(args)
+        outputs = []
+        while (out := self.run_to_output()) is not None:
             outputs.append(out)
         return outputs
