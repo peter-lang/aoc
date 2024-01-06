@@ -1,5 +1,5 @@
 import heapdict
-import sys
+import math
 
 lines = list(map(lambda x: x.strip(), open("12.txt", "r").readlines()))
 
@@ -17,8 +17,6 @@ board = [
     [ord(ch) - ord("a") for ch in line.replace("S", "a").replace("E", "z")]
     for line in lines
 ]
-
-inf = sys.maxsize
 
 
 def neighbours(n):
@@ -64,7 +62,7 @@ def a_star(start, ends):
 
         for child in filter(lambda x: valid(x, current), neighbours(current)):
             tentative_g_score = g_score[current] + 1
-            if tentative_g_score < g_score.get(child, inf):
+            if tentative_g_score < g_score.get(child, math.inf):
                 come_from[child] = current
                 g_score[child] = tentative_g_score
                 open_set[child] = tentative_g_score + heuristic(child)

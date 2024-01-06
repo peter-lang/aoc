@@ -1,6 +1,10 @@
 from collections import deque
 
 
+class WaitForInput(Exception):
+    pass
+
+
 class Computer:
     def __init__(self, code):
         self.code = code
@@ -56,6 +60,8 @@ class Computer:
                 self.write(self.p_adr(3), self.p_val(1) * self.p_val(2))
                 self.ip += 4
             elif op_code == 3:
+                if len(self.inputs) == 0:
+                    raise WaitForInput
                 self.write(self.p_adr(1), self.inputs.popleft())
                 self.ip += 2
             elif op_code == 4:
