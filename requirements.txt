@@ -3,3 +3,4 @@ scipy
 PuLP
 sympy
 HeapDict
+z3-solver

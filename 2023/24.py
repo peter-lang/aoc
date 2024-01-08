@@ -1,5 +1,6 @@
 import sympy as sp
 import re
+import z3
 
 hailstones = [
     (tuple(map(int, re.split(r"\s*,\s*", a))), tuple(map(int, re.split(r"\s*,\s*", b))))
@@ -48,49 +49,34 @@ def collisions_2d_inside(trajectories, pos_min: int, pos_max: int):
     )
 
 
-def all_2d_collisions(trajectories):
-    for idx, a in enumerate(trajectories):
-        collisions = []
-        for b in trajectories[idx:]:
-            coll = collision_2d(a[0], a[1], b[0], b[1], axis=(1, 2))
-            if coll is not None:
-                collisions.append((coll, b))
-
-
 # part 1
 print(collisions_2d_inside(hailstones, 200000000000000, 400000000000000))
 
 
 # part 2
-def print_equations(ap, av, bp, bv, cp, cv):
+def solve(trajectories):
     # for first 3 lines, this gives 9 equations and 9 variables:
     # ap + r * av == u + r * v
     # bp + s * bv == u + s * v
     # cp + t * cv == u + t * v
-    # rearranging:
-    # (ap + r * av - bp - s * bv)/(r-s) == v
-    # (ap + r * av - cp - t * cv)/(r-t) == v
-    # rearranging:
-    # (ap + r * av - bp - s * bv)*(r-t) == (ap + r * av - cp - t * cv)*(r-s)
-    # solved this in wolframalpha: https://www.wolframalpha.com/input/?i=system+of+equations
-    for i in range(3):
-        print(
-            f"({ap[i]}+r*({av[i]})-({bp[i]})-s*({bv[i]}))*(r-t) = ({ap[i]}+r*({av[i]})-({cp[i]})-t*({cv[i]}))*(r-s)"
-        )
+    solver = z3.SolverFor("QF_LIA")
+
+    p = z3.IntVector("p", 3)
+    v = z3.IntVector("v", 3)
+    ts = z3.IntVector("t", len(trajectories))
+
+    for t_i, (hs_p, hs_v) in zip(ts, trajectories):
+        solver.add(t_i > 0)
+        for i in range(3):
+            solver.add(hs_p[i] + t_i * hs_v[i] == p[i] + t_i * v[i])
+
+    assert solver.check() == z3.sat
+    mod = solver.model()
+    p_val = [mod[p[i]].as_long() for i in range(3)]
+    v_val = [mod[v[i]].as_long() for i in range(3)]
+    return p_val, v_val
 
 
-print_equations(*hailstones[0], *hailstones[1], *hailstones[2])
+res_p, _ = solve(hailstones[:3])
 
-r = 711444906273
-s = 943556327678
-t = 69419109633
-
-
-def find_vectors(ap, av, bp, bv, cp, cv, r, s, t):
-    v = tuple((ap[i] + r * av[i] - bp[i] - s * bv[i]) / (r - s) for i in range(3))
-    p = tuple(ap[i] + r * (av[i] - v[i]) for i in range(3))
-    return p, v
-
-
-res_p, res_v = find_vectors(*hailstones[0], *hailstones[1], *hailstones[2], r, s, t)
 print(int(sum(res_p)))
