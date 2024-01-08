@@ -29,7 +29,6 @@ def pt_neighbour(pt):
     yield pt[0], pt[1] + 1
 
 
-# (start[0] + d[0], start[1] + d[1])
 def quadrant(d):
     board = np.copy(BOARD)
     board[START[0], :] = BLOCK
@@ -42,11 +41,6 @@ def quadrant(d):
         return board[START[0] :, START[1] :], (1, 1)
     if d == (1, -1):  # bottom-left
         return board[START[0] :, : (START[1] + 1)], (1, START[1] - 1)
-
-
-def pprint(b):
-    for row in b:
-        print("".join(code_table[v] for v in row))
 
 
 # Middle area looks like this:
