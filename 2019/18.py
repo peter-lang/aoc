@@ -155,32 +155,44 @@ def update_tuple(prev, i, val):
 
 def planning_a_star(srcs, edges, key2deps):
     open_set = heapdict.heapdict()
+    g_score = dict()
+
+    def distance(_srcs, dst):
+        for i, edge in enumerate(edges):
+            if dst in edge[_srcs[i]]:
+                return i, edge[_srcs[i]][dst]
+
+    def heuristic(_srcs, _collected):
+        return max(
+            (distance(_srcs, k)[1] for k in key2deps.keys() if k not in _collected),
+            default=0,
+        )
 
     for key, deps in key2deps.items():
         if deps:
             continue
-
-        for idx in range(len(edges)):
-            if key in edges[idx][srcs[idx]]:
-                dict_key = (update_tuple(srcs, idx, key), frozenset({key}))
-                dist = edges[idx][srcs[idx]][key]
-                open_set[dict_key] = dist
+        idx, child_dist = distance(srcs, key)
+        node = (update_tuple(srcs, idx, key), frozenset({key}))
+        open_set[node] = child_dist + heuristic(*node)
+        g_score[node] = child_dist
 
     while open_set:
-        node, dist = open_set.popitem()
-        srcs, collected = node
+        node, _ = open_set.popitem()
+        node_dist = g_score[node]
+        node_srcs, collected = node
         if len(collected) == len(key2deps):
-            return dist
-        for k2, deps in key2deps.items():
-            if k2 in collected or bool(deps - collected):
+            return node_dist
+
+        for key, deps in key2deps.items():
+            if key in collected or bool(deps - collected):
                 continue
 
-            for idx in range(len(edges)):
-                if k2 in edges[idx][srcs[idx]]:
-                    dict_key = (update_tuple(srcs, idx, k2), collected | {k2})
-                    tentative_dist = dist + edges[idx][srcs[idx]][k2]
-                    if tentative_dist < open_set.get(dict_key, math.inf):
-                        open_set[dict_key] = tentative_dist
+            idx, child_dist = distance(node_srcs, key)
+            node = (update_tuple(node_srcs, idx, key), collected | {key})
+            tentative_g_score = node_dist + child_dist
+            if tentative_g_score < g_score.get(node, math.inf):
+                g_score[node] = tentative_g_score
+                open_set[node] = tentative_g_score + heuristic(*node)
 
     return None
 
