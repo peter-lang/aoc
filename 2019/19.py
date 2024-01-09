@@ -15,52 +15,65 @@ print(
 )
 
 
-def find_min(x, y):
-    assert beam(x, y) == 0
-    while beam(x, y) == 0:
-        y += 1
-    return y - 1
+def find_last_before_beam(_x, _y):
+    assert beam(_x, _y) == 0
+    while beam(_x, _y) == 0:
+        _y += 1
+    return _y - 1
 
 
-def find_max(x, y):
-    assert beam(x, y) == 1
-    while beam(x, y) == 1:
-        y += 1
-    return y - 1
+def find_last_in_beam(_x, _y):
+    assert beam(_x, _y) == 1
+    while beam(_x, _y) == 1:
+        _y += 1
+    return _y - 1
 
 
 # approximate lines with rational numbers
+# beam edge equations: y = c1*x and y = c2*x
 x = 10
-c2 = find_min(x, 0) / x
-c1 = find_max(x, int(x * c2) + 1) / x
+c2 = find_last_before_beam(x, 0) / x
+c1 = find_last_in_beam(x, int(x * c2) + 1) / x
 
 for i in range(2, 10):
     x = 10**i
-    c2 = find_min(x, int(x * c2)) / x
-    c1 = find_max(x, int(x * c1)) / x
+    c2 = find_last_before_beam(x, int(x * c2)) / x
+    c1 = find_last_in_beam(x, int(x * c1)) / x
+
 
 # solve equation to find approximate points
+# opposite corners of square: (x1, y1) and (x2, y2)
+# corners are on different edges: y1=c1*x1, y2=c2*x2
+# corners are on -1 slope diagonal: (x2-x1) = -(y2-y1)
+# side lengths are 100: x2-x1 = 100, y1-y2 = 100
+#
+# x2-x1 = y1-y2 = c1*x1 - c2*x2 => x2 = x1*(c1+1)/(c2+1)
+# x2-x1 = 100 => x1*( (1+c1)/(1+c2) - 1) = 100
 k = (c1 + 1) / (c2 + 1)
 x1 = 100 / (k - 1)
 x2 = x1 * k
 y1 = c1 * x1
 y2 = c2 * x2
 
+assert int(x2) == int(x1) + 100 and int(y1) == int(y2) + 100
 
-x, y = min(int(x1), int(x2)), min(int(y2), int(y1))
-
-
-def width_at_least(x, y, w):
-    return beam(x + w - 1, y) == 1
+x, y = int(x1), int(y2)
 
 
-def height_at_least(x, y, h):
-    return beam(x, y + h - 1) == 1
+def width_at_least(_x, _y, w):
+    return beam(_x + w - 1, _y) == 1
 
 
-assert width_at_least(x, y, 100) and height_at_least(x, y, 100)
+def height_at_least(_x, _y, h):
+    return beam(_x, _y + h - 1) == 1
 
-# gradually fine-tune minimal location
+
+# go further until beam width/height is enough
+while not (width_at_least(x, y, 100) and height_at_least(x, y, 100)):
+    y += 1
+    x += 1
+
+# go back until beam width/height cannot shrink anymore
 while True:
     if width_at_least(x - 1, y - 1, 100) and height_at_least(x - 1, y - 1, 100):
         y -= 1
