@@ -53,7 +53,7 @@ def apply_multi(op: ModOp, x: int, times: int):
     return apply_multi(squared, x, times // 2)
 
 
-rev_shuffle = reduce(
+inv_shuffle = reduce(
     chain,
     map(
         inverse,
@@ -62,4 +62,4 @@ rev_shuffle = reduce(
 )
 
 # part 2
-print(apply_multi(rev_shuffle, 2020, 101741582076661))
+print(apply_multi(inv_shuffle, 2020, 101741582076661))
