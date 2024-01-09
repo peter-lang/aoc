@@ -19,17 +19,17 @@ UNKNOWN = {p for p in neighbour((0, 0))}
 
 
 def bfs(src, targets, board):
-    visited = set()
+    visited = {src}
     nodes = deque([(src, [src])])
     while nodes:
         node, path_to = nodes.popleft()
 
-        visited.add(node)
         for child in neighbour(node):
             if child in targets:
                 return path_to + [child]
             if child in visited or board.get(child, 0) == 0:
                 continue
+            visited.add(child)
             nodes.append((child, path_to + [child]))
     return None
 
@@ -40,10 +40,10 @@ def bfs_fill(src, board):
     dist = math.inf
     while nodes:
         node, dist = nodes.popleft()
-        visited.add(node)
         for child in neighbour(node):
             if child in visited or board[child] == 0:
                 continue
+            visited.add(child)
             nodes.append((child, dist + 1))
     return dist
 

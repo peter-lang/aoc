@@ -26,15 +26,15 @@ def total_descendants(edges, root, depth):
 
 
 def bfs(edges, src, tar):
-    visited = set()
+    visited = {src}
     nodes = deque([(src, 0)])
     while nodes:
         node, dist = nodes.popleft()
         if node == tar:
             return dist
-        visited.add(node)
         for child in edges[node]:
             if child not in visited:
+                visited.add(child)
                 nodes.append((child, dist + 1))
     return None
 

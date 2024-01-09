@@ -53,16 +53,16 @@ above_stacks = {(0, (i + 1) * 2) for i in range(4)}
 def bfs_neighbours(
     pt: COORD, occupied: frozenset[COORD], stack_size: int
 ) -> dict[COORD, int]:
-    visited = dict()
+    visited = {pt: 0}
     open_set = deque([(pt, 0)])
     while open_set:
         curr, dist = open_set.popleft()
-        if curr in visited:
-            continue
-        visited[curr] = dist
         for n in pt_neighbour(curr, stack_size):
             if n in occupied:
                 continue
+            if n in visited:
+                continue
+            visited[n] = dist + 1
             open_set.append((n, dist + 1))
     del visited[pt]
     return visited
